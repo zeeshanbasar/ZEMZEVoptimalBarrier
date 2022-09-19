@@ -38,9 +38,13 @@ dx = zeros(7,1);
     rho3 = k2(3);
     
     %%% DIST FROM BARRIER %%%    
-    d1 = abs(x(1) - rho1);
-    d2 = abs(x(2) - rho2);
-    d3 = abs(x(3) - rho3);
+    s1 = x(1) - rho1;
+    s2 = x(2) - rho2;
+    s3 = x(3) - rho3;
+    
+    d1 = abs(s1);
+    d2 = abs(s2);
+    d3 = abs(s3);
     
     %%% AUGMENTATION %%%
     phi1 = l2(1)/(d1^2 + l1(1));
@@ -63,9 +67,9 @@ dx = zeros(7,1);
     %%% THRUST GENERATION %%%
 
     %%% NEW OGL %%%
-%     p1 = (-2*d1*l2(1)*b1)/(d1^2 + l1(1))^2;
-%     p2 = (-2*d2*l2(2)*b2)/(d2^2 + l1(2))^2;
-%     p3 = (-2*d3*l2(3)*b3)/(d3^2 + l1(3))^2;
+%     p1 = (-2*sign(s1)*d1*l2(1)*b1)/(d1^2 + l1(1))^2;
+%     p2 = (-2*sign(s2)*d2*l2(2)*b2)/(d2^2 + l1(2))^2;
+%     p3 = (-2*sign(s3)*d3*l2(3)*b3)/(d3^2 + l1(3))^2;
 %     
 %     p = [p1; p2; p3];
 %     a = ((6*ZEM/tgo^2) - (2*ZEV/tgo) - (p/18)*(tgo^2));
