@@ -21,6 +21,7 @@ dx = zeros(7,1);
     
     l1 = [1;1;1];
     l2 = [6;6;6];
+    l4 = 90*ones(3,1);
     
     %%% BARRIER DEFN %%%    
     if x(1) >=0 
@@ -67,25 +68,25 @@ dx = zeros(7,1);
     %%% THRUST GENERATION %%%
 
     %%% NEW OGL %%%
-%     p1 = (-2*sign(s1)*d1*l2(1)*b1)/(d1^2 + l1(1))^2;
-%     p2 = (-2*sign(s2)*d2*l2(2)*b2)/(d2^2 + l1(2))^2;
-%     p3 = (-2*sign(s3)*d3*l2(3)*b3)/(d3^2 + l1(3))^2;
-%     
-%     p = [p1; p2; p3];
-%     a = ((6*ZEM/tgo^2) - (2*ZEV/tgo) - (p/18)*(tgo^2));
-%     
-%     T = a*x(7);
+     p1 = (-2*l4(1)*sign(s1)*d1*l2(1)*b1)/(d1^2 + l1(1))^2;
+     p2 = (-2*l4(2)*sign(s2)*d2*l2(2)*b2)/(d2^2 + l1(2))^2;
+     p3 = (-2*l4(3)*sign(s3)*d3*l2(3)*b3)/(d3^2 + l1(3))^2;
+     
+     p = [p1; p2; p3];
+     a = ((6*ZEM/tgo^2) - (2*ZEV/tgo) - (p/18)*(tgo^2));
+     
+     T = a*x(7);
     
     
     %%% ORIGINAL OGL %%%
-    A = [0 0 1]';
-    del = 1;
-    phi = del^2/3;
-    c = 500;
-    a_av = A*c*(r(3)^2 - phi)*(tgo^2)/(24*(r(3)^2 + phi)^2);
-    a = ((6*ZEM/tgo^2) - (2*ZEV/tgo) + a_av);
-    
-    T = a*x(7);
+%    A = [0 0 1]';
+%    del = 1;
+%    phi = del^2/3;
+%    c = 500;
+%    a_av = A*c*(r(3)^2 - phi)*(tgo^2)/(24*(r(3)^2 + phi)^2);
+%    a = ((6*ZEM/tgo^2) - (2*ZEV/tgo) + a_av);
+%    
+%    T = a*x(7);
     
     %%% ATM PERTURB %%%
 %     ap = 0.2*(T./x(7))*sin(pi*t/3);
