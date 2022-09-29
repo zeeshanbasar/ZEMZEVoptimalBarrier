@@ -14,9 +14,9 @@ tf = 100;
 N = 10000;
 tSpan = linspace(t0,tf,N);
 
-del_m = zeros(1,30);
+del_m = zeros(1, length(IC));
 
-for i = 1: length(IC)
+for i = 1:length(IC)
     bf = 2;
     % 1: smooth
     % 2: glideslope
