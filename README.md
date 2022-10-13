@@ -18,6 +18,6 @@ working PoC of ZEM/ZEV-based, fuel optimal, collision avoidance and planetary la
 
 ### UPDATE: 13-10-2022 ###
 - fixed the issue where trajectory was bouncing off the higher level, instead of allowable lower level
--- replaced 2-norm with inf-norm
+  - replaced 2-norm with inf-norm
 - moved the barrier 5 down by 500m; did it to make the barrier similar to the one in Gong et al. (2022)
 - so for smaller tf the trjaectories are much, much smoother, but the acceleration demand is obviously very high
