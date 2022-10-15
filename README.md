@@ -21,3 +21,9 @@ working PoC of ZEM/ZEV-based, fuel optimal, collision avoidance and planetary la
   - replaced 2-norm with inf-norm
 - moved the barrier 5 down by 500m; did it to make the barrier similar to the one in Gong et al. (2022)
 - so for smaller tf the trjaectories are much, much smoother, but the acceleration demand is obviously very high
+
+### UPDATE: 15-10-2022 ###
+- some beauty edits, removed unnecessary codes
+- for bf == 5 (2-step, flat top), all barrier calculations are now done by MATLAB
+   - all constants are now based on barrier definitions
+- added guidelines for selecting l2, and l1.
