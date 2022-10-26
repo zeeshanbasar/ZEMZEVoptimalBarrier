@@ -1,4 +1,4 @@
-function dx = odefin(t,x,tf,bf,cl)
+function dx = odefin_131022(t,x,tf,bf,cl)
 dx = zeros(7,1);
     
     %%% PLANET PARAMS %%%
