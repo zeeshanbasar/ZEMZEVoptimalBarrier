@@ -1,7 +1,11 @@
 clc;clear;close all
 
 %% INIT %%
-IC = load('init-test_tiny.mat').IC;
+IC = load('init_small-fin.mat').IC;
+% IC = [-1000 0 2200 100 0 -100 1905];
+% IC = [-1000 0 2200 100 0 -100 1905];
+% IC = [-775.384257171295 -580.169040972933 2126.69832046694 -4.97374370972186 -42.5670091066786 -90.9964149338925 1879.45146725203];
+% IC =[-775.384257171295 -311.256840136371 2126.69832046694 -4.97374370972186 -42.5670091066786 -90.9964149338925 1879.45146725203];
 t0 = 0;
 tf = 100;
 
@@ -25,17 +29,21 @@ bf = 5;
 % 4: flat top, 1-step
 % 5: flat top, 2-step
 
+l1 = 6;
+
 tic
 for cl = 1
 % 3: classical ZEM-ZEV
 % 2: self adjusting ZEM-ZEV
 % 1: new ogl
+% [43 115 161 232 615 617 701 710 732 735 784 803 886 894]
 for i = 1:length(IC) % set this to < parfor > when needed
-    
-    init = IC(i,:);
+%     i = 1;
+    init = (IC(i,:));
+% for l1 = 1:5:40
 
-    [t,x] = ode45(@(t,x) odeMain(t,x,tf,bf,cl), tSpan, init);
-
+    [t,x] = ode89(@(t,x) odeMain(t,x,tf,bf,cl,l1), tSpan, init, options);
+    [~,T] = cellfun(@(t,x) odeMain(t,x,tf,bf,cl,l1), num2cell(t), num2cell(x,2),'uni',0);
     %% PLOTS %%
     N = length(x);
 
@@ -49,304 +57,349 @@ for i = 1:length(IC) % set this to < parfor > when needed
 % %     hold on
 % %     grid on
 % % 
-% %     % POSITION %
+% %    % POSITION %
 % %     figure(2)
 % %     subplot(3,1,1)
-% %     plot(t,x(:,1))
+% %     plot(t(1:100:end),x(1:100:end,1))
 % %     hold on
 % %     grid on
 % % 
 % %     subplot(3,1,2)
-% %     plot(t,x(:,2))
+% %     plot(t(1:100:end),x(1:100:end,2))
 % %     hold on
 % %     grid on
 % % 
 % %     subplot(3,1,3)
-% %     plot(t,x(:,3))
+% %     plot(t(1:100:end),x(1:100:end,3))
 % %     hold on
 % %     grid on
 % % 
 % %     % VELOCITY %
 % %     figure(3)
 % %     subplot(3,1,1)
-% %     plot(t,x(:,4))
+% %     plot(t(1:100:end),x(1:100:end,4))
 % %     hold on
 % %     grid on
 % % 
 % %     subplot(3,1,2)
-% %     plot(t,x(:,5))
+% %     plot(t(1:100:end),x(1:100:end,5))
 % %     hold on
 % %     grid on
 % % 
 % %     subplot(3,1,3)
-% %     plot(t,x(:,6))
+% %     plot(t(1:100:end),x(1:100:end,6))
 % %     hold on
 % %     grid on
-% % 
-% % % % 
-% % % %     % % THRUST %
-% % % %     % A = [0 0 1]';
-% % % %     % del = 1;
-% % % %     % phi = del^2/3;
-% % % %     % c = 500;
-% % % %     % tgo = tf - t;
-% % % %     % r = [x(:,1) x(:,2) x(:,3)];
-% % % %     % v = [x(:,4) x(:,5) x(:,6)];
-% % % %     % ZEM = rd' - (r + v.*tgo + 0.5*g'.*tgo.^2);
-% % % %     % ZEV = vd' - (v + g'.*tgo);
-% % % %     % a_av = c*(x(:,3).^2 - phi).*(tgo.^2)./(24*(x(:,3).^2 + phi).^2);
-% % % %     % T = ((6*ZEM./tgo.^2) - (2*ZEV./tgo) + a_av).*x(:,7);
-% % % %     % 
-% % % %     % figure(5)
-% % % %     % subplot(3,1,1)
-% % % %     % plot(t,T(:,1))
-% % % %     % grid on
-% % % %     % 
-% % % %     % subplot(3,1,2)
-% % % %     % plot(t,T(:,2))
-% % % %     % grid on
-% % % %     % 
-% % % %     % subplot(3,1,3)
-% % % %     % plot(t,T(:,3))
-% % % %     % grid on
-% % % % 
-% % % % 
-% %     
-    if bf == 1
-        bx = 0:0.1:650;
-        by = 0:0.1:650;
-        
-        k0 = [0;0;0];
-        k1 = [0.17;0.17;0.17]*1000;
-        k2 = [0;0;1];
-        k3 = [6;6;6];
-        
-        bzx = ((bx-k0(1))/k1(1)).^(k3(1)) - k2(1);
-        bzy = ((by-k0(2))/k1(2)).^(k3(2)) - k2(2);
-    elseif bf == 2
-        bx = 0:0.1:1000;
-        by = 0:0.1:1000;
-        
-        k0 = [0;0;0];
-        k1 = [1.5;1.5;1.5];
-        k2 = [0;0;1];
-        k3 = [1;1;1];
-        
-        bzx = ((bx-k0(1))/k1(1)).^(k3(1)) - k2(1);
-        bzy = ((by-k0(2))/k1(2)).^(k3(2)) - k2(2);
-    elseif bf == 3
-        bx = 0:0.1:1000;
-        by = 0:0.1:1000;
-        bzx = zeros(1,10001);
-        bzy = zeros(1,10001);
-        
-        for j = 1:width(bx)
-            if bx(j) > 300
-                k0 = [300;300;300];
-                k1 = [178;178;178];
-                k2 = [-200;-200;1];
-                k3 = [6;6;6];
-                bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
-            else
-                k0 = [0;0;0];
-                k1 = [231;231;231];
-                k2 = [0;0;1];
-                k3 = [20;20;20];
-                bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
-            end
-        end
-        for k = 1:width(by)
-            if by(k) > 300
-                k0 = [300;300;300];
-                k1 = [178;178;178];
-                k2 = [-200;-200;1];
-                k3 = [6;6;6];
-                bzy(k) = ((by(k)-k0(2))/k1(2)).^(k3(2)) - k2(2);
-            else
-                k0 = [0;0;0];
-                k1 = [231;231;231];
-                k2 = [0;0;1];
-                k3 = [20;20;20];
-                bzy(k) = ((by(k)-k0(2))/k1(2)).^(k3(2)) - k2(2);
-            end
-        end
-    elseif bf == 4
-        bx = 0:0.1:1000;
-        by = 0:0.1:1000;
-        bzx = zeros(1,10001);
-        bzy = zeros(1,10001);
-        
-        for j = 1:width(bx)
-            if bx(j) > 300
-                k0 = 0*ones(3,1);
-                k1 = 300*ones(3,1);
-                k2 = [-200;-200;201];
-                k3 = 1*ones(3,1);
-                bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
-            else
-                k0 = [0;0;0];
-                k1 = [230;230;230];
-                k2 = [0;0;1];
-                k3 = [20;20;20]; 
-                bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
-            end
-        end
-        for k = 1:width(by)
-            if by(k) > 300
-                k0 = 0*ones(3,1);
-                k1 = 300*ones(3,1);
-                k2 = [-200;-200;201];
-                k3 = 1*ones(3,1);
-                bzy(k) = ((by(k)-k0(2))/k1(2)).^(k3(2)) - k2(2);
-            else
-                k0 = [0;0;0];
-                k1 = [230;230;230];
-                k2 = [0;0;1];
-                k3 = [20;20;20]; 
-                bzy(k) = ((by(k)-k0(2))/k1(2)).^(k3(2)) - k2(2);
-            end
-        end
 
-    elseif bf == 5
-        bx = 0:0.1:2000;
-        by = 0:0.1:2000;
-        bzx = zeros(1,20001);
-        bzy = zeros(1,20001);        
-        for j = 1:width(bx)
-            h = [500;1000];
-            w = [600;1000];
-            delta = 10;
-
-            if bx(j) > w(2)
-                alpha = deg2rad(0.05);
-
-                k3 = ones(3,1);
-                k0 = w(2)*ones(3,1);
-                k1 = tan((pi/2) - alpha)*ones(3,1);
-                k2 = [-h(2);-h(2);h(2) + delta];
-
-                bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
-
-            elseif ((bx(j) <= w(2)) && (bx(j) > w(1)))
-
-                k3 = 6*ones(3,1);
-                k0 = w(1)*ones(3,1);
-                k1 = ((w(2) - w(1))/(h(2) - h(1))^(1/k3(1)))*ones(3,1);
-                k2 = [-h(1);-h(1);h(1) + delta];
-
-                bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
-
-            else
-
-                k3 = 20*ones(3,1);
-                k0 = zeros(3,1);
-                k1 = (w(1)/h(1)^(1/k3(1)))*ones(3,1);
-                k2 = zeros(3,1);
-
-                bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
-
-            end
-        end
-        
-        for j = 1:width(by)
-            h = [500;1000];
-            w = [600;1000];
-            delta = 10;
-
-            if by(j) > w(2)
-                alpha = deg2rad(0.05);
-
-                k3 = ones(3,1);
-                k0 = w(2)*ones(3,1);
-                k1 = tan((pi/2) - alpha)*ones(3,1);
-                k2 = [-h(2);-h(2);h(2) + delta];
-
-                bzy(j) = ((by(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
-
-            elseif ((by(j) <= w(2)) && (by(j) > w(1)))
-
-                k3 = 6*ones(3,1);
-                k0 = w(1)*ones(3,1);
-                k1 = ((w(2) - w(1))/(h(2) - h(1))^(1/k3(1)))*ones(3,1);
-                k2 = [-h(1);-h(1);h(1) + delta];
-
-                bzy(j) = ((by(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
-            else
-
-                k3 = 20*ones(3,1);
-                k0 = zeros(3,1);
-                k1 = (w(1)/h(1)^(1/k3(1)))*ones(3,1);
-                k2 = zeros(3,1);
-
-                bzy(j) = ((by(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
-
-            end
-        end 
-    end
+    % PLANAR TRAJECTORY %
 
     figure(5)
-    xlabel('x (m)', 'FontSize', 14)
-    ylabel('z (m)', 'FontSize', 14)
-
-    plot(x(:,1),x(:,3), 'LineWidth', 1, 'DisplayName',num2str(i))
+    plot(x(1:100:end,1),x(1:100:end,3), 'LineWidth', 1)
     hold on
     plot(x(1,1),x(1,3),'ks')
     hold on
     plot(x(N,1),x(N,3),'ro')
     hold on
-    plot(-bx, bzx, '--');
-    hold on
-    plot(bx, bzx, '--');
-    hold on
-
     grid on
 
 
     figure(6)
-    xlabel('y (m)', 'FontSize', 14)
-    ylabel('z (m)', 'FontSize', 14)
-
-    plot(x(:,2),x(:,3), 'LineWidth', 1, 'DisplayName',num2str(i))
+    plot(x(1:100:end,2),x(1:100:end,3), 'LineWidth', 1)
     hold on
     plot(x(1,2),x(1,3),'ks')
     hold on
     plot(x(N,2),x(N,3),'ro')
     hold on
-    plot(by, bzy, '--');
-    hold on
-    plot(-by, bzy, '--');
-    hold on
-
     grid on
+
+
+% %     % ACCELERATION %
+% % % %     T = acceleration(x,bf,cl,tf,t,l1);
+% %     T = [T{:,1:end}]';
+% % 
+% % % %     T = [T(:,1).*x(:,7) T(:,2).*x(:,7) T(:,3).*x(:,7)];
+% % 
+% %     figure(9)
+% %     plot(t(1:100:length(T)),T(1:100:end,1))
+% %     hold on
+% %     grid on
+% % 
+% %     figure(10)
+% %     plot(t(1:100:length(T)),T(1:100:end,2))
+% %     hold on
+% %     grid on
+% % 
+% %     figure(11)
+% %     plot(t(1:100:length(T)),T(1:100:end,3))
+% %     hold on
+% %     grid on
 
     del_m(i,cl) = x(1,7) - x(N-1,7);
 
 end
-figure(7)
-xlabel('Test Case #')
-ylabel('\Deltam')
 
-scatter(1:length(IC),del_m(:,cl), 'LineWidth', 1);
-hold on
-grid on
-
-mu(cl) = mean(del_m(:,cl));
-disp(['mu = ', num2str(mu)]);
-
-sd(cl) = std(del_m(:,cl));
-disp(['sd = ', num2str(sd)]);
+% % % FUEL STATS %
+% % 
+% % figure(7)
+% % scatter(1:length(IC),del_m(:,cl), 'LineWidth', 1);
+% % hold on
+% % grid on
+% % 
+% % mu(cl) = mean(del_m(:,cl));
+% % disp(['mu = ', num2str(mu)]);
+% % 
+% % sd(cl) = std(del_m(:,cl));
+% % disp(['sd = ', num2str(sd)]);
 
 end
 toc
 
-figure(8)
-xlabel('Algorithm')
-ylabel('\Deltam stats')
+% % figure(8)
+% % boxchart(del_m(:,1:cl));
+% % grid on
 
-boxplot(del_m(:,1:cl));
-grid on
+%% PLOT POSTPROCESSING %%
+if bf == 1
+    bx = 0:0.1:650;
+    by = 0:0.1:650;
+    
+    k0 = [0;0;0];
+    k1 = [0.17;0.17;0.17]*1000;
+    k2 = [0;0;1];
+    k3 = [6;6;6];
+    
+    bzx = ((bx-k0(1))/k1(1)).^(k3(1)) - k2(1);
+    bzy = ((by-k0(2))/k1(2)).^(k3(2)) - k2(2);
+elseif bf == 2
+    bx = 0:0.1:1000;
+    by = 0:0.1:1000;
+    
+    k0 = [0;0;0];
+    k1 = [1.5;1.5;1.5];
+    k2 = [0;0;1];
+    k3 = [1;1;1];
+    
+    bzx = ((bx-k0(1))/k1(1)).^(k3(1)) - k2(1);
+    bzy = ((by-k0(2))/k1(2)).^(k3(2)) - k2(2);
+elseif bf == 3
+    bx = 0:0.1:1000;
+    by = 0:0.1:1000;
+    bzx = zeros(1,10001);
+    bzy = zeros(1,10001);
+    
+    for j = 1:width(bx)
+        if bx(j) > 300
+            k0 = [300;300;300];
+            k1 = [178;178;178];
+            k2 = [-200;-200;1];
+            k3 = [6;6;6];
+            bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
+        else
+            k0 = [0;0;0];
+            k1 = [231;231;231];
+            k2 = [0;0;1];
+            k3 = [20;20;20];
+            bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
+        end
+    end
+    for k = 1:width(by)
+        if by(k) > 300
+            k0 = [300;300;300];
+            k1 = [178;178;178];
+            k2 = [-200;-200;1];
+            k3 = [6;6;6];
+            bzy(k) = ((by(k)-k0(2))/k1(2)).^(k3(2)) - k2(2);
+        else
+            k0 = [0;0;0];
+            k1 = [231;231;231];
+            k2 = [0;0;1];
+            k3 = [20;20;20];
+            bzy(k) = ((by(k)-k0(2))/k1(2)).^(k3(2)) - k2(2);
+        end
+    end
+elseif bf == 4
+    bx = 0:0.1:1000;
+    by = 0:0.1:1000;
+    bzx = zeros(1,10001);
+    bzy = zeros(1,10001);
+    
+    for j = 1:width(bx)
+        if bx(j) > 300
+            k0 = 0*ones(3,1);
+            k1 = 300*ones(3,1);
+            k2 = [-200;-200;201];
+            k3 = 1*ones(3,1);
+            bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
+        else
+            k0 = [0;0;0];
+            k1 = [230;230;230];
+            k2 = [0;0;1];
+            k3 = [20;20;20]; 
+            bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
+        end
+    end
+    for k = 1:width(by)
+        if by(k) > 300
+            k0 = 0*ones(3,1);
+            k1 = 300*ones(3,1);
+            k2 = [-200;-200;201];
+            k3 = 1*ones(3,1);
+            bzy(k) = ((by(k)-k0(2))/k1(2)).^(k3(2)) - k2(2);
+        else
+            k0 = [0;0;0];
+            k1 = [230;230;230];
+            k2 = [0;0;1];
+            k3 = [20;20;20]; 
+            bzy(k) = ((by(k)-k0(2))/k1(2)).^(k3(2)) - k2(2);
+        end
+    end
 
-% % [h,p,ci,stats] = ttest(del_m(:,1)-mu(1))
+elseif bf == 5
+    bx = 0:0.1:2000;
+    by = 0:0.1:2000;
+    bzx = zeros(1,20001);
+    bzy = zeros(1,20001);        
+    for j = 1:width(bx)
+        h = [500;1000];
+        w = [600;1000];
+        delta = 10;
+
+        if bx(j) > w(2)
+            alpha = deg2rad(0.05);
+
+            k3 = ones(3,1);
+            k0 = w(2)*ones(3,1);
+            k1 = tan((pi/2) - alpha)*ones(3,1);
+            k2 = [-h(2);-h(2);h(2) + delta];
+
+            bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
+
+        elseif ((bx(j) <= w(2)) && (bx(j) > w(1)))
+
+            k3 = 6*ones(3,1);
+            k0 = w(1)*ones(3,1);
+            k1 = ((w(2) - w(1))/(h(2) - h(1))^(1/k3(1)))*ones(3,1);
+            k2 = [-h(1);-h(1);h(1) + delta];
+
+            bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
+
+        else
+
+            k3 = 20*ones(3,1);
+            k0 = zeros(3,1);
+            k1 = (w(1)/h(1)^(1/k3(1)))*ones(3,1);
+            k2 = zeros(3,1);
+
+            bzx(j) = ((bx(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
+
+        end
+    end  
+    for j = 1:width(by)
+        h = [500;1000];
+        w = [600;1000];
+        delta = 10;
+
+        if by(j) > w(2)
+            alpha = deg2rad(0.05);
+
+            k3 = ones(3,1);
+            k0 = w(2)*ones(3,1);
+            k1 = tan((pi/2) - alpha)*ones(3,1);
+            k2 = [-h(2);-h(2);h(2) + delta];
+
+            bzy(j) = ((by(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
+
+        elseif ((by(j) <= w(2)) && (by(j) > w(1)))
+
+            k3 = 6*ones(3,1);
+            k0 = w(1)*ones(3,1);
+            k1 = ((w(2) - w(1))/(h(2) - h(1))^(1/k3(1)))*ones(3,1);
+            k2 = [-h(1);-h(1);h(1) + delta];
+
+            bzy(j) = ((by(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
+        else
+
+            k3 = 20*ones(3,1);
+            k0 = zeros(3,1);
+            k1 = (w(1)/h(1)^(1/k3(1)))*ones(3,1);
+            k2 = zeros(3,1);
+
+            bzy(j) = ((by(j)-k0(1))/k1(1)).^(k3(1)) - k2(1);
+
+        end
+    end 
+end
 % % 
-% % [h2,p2,ci2,stats2] = ttest(del_m(:,2)-mu(2))
+% % % POSITION %
+% % figure(2)
+% % subplot(3,1,1)
+% % xlabel('$t$ (s)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % ylabel('$x$ (m)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % 
+% % subplot(3,1,2)
+% % xlabel('$t$ (s)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % ylabel('$y$ (m)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % 
+% % subplot(3,1,3)
+% % xlabel('$t$ (s)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % ylabel('$z$ (m)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % 
+% % % VELOCITY %
+% % figure(3)
+% % subplot(3,1,1)
+% % xlabel('$t$ (s)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % ylabel('$v_x$ (m)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % 
+% % subplot(3,1,2)
+% % xlabel('$t$ (s)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % ylabel('$v_y$ (m)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % 
+% % subplot(3,1,3)
+% % xlabel('$t$ (s)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % ylabel('$v_z$ (m)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+
+
+% PLANAR TRAJECTORY %
+figure(5)
+xlabel('x (m)', 'FontSize', 14, 'Interpreter', 'latex')
+ylabel('z (m)', 'FontSize', 14, 'Interpreter', 'latex')
+plot(-bx, bzx, '--', 'Color', 'black', 'LineWidth', 2);
+hold on
+plot(bx, bzx, '--', 'Color', 'black', 'LineWidth', 2);
+hold on
+
+figure(6)
+xlabel('y (m)', 'FontSize', 14, 'Interpreter', 'latex')
+ylabel('z (m)', 'FontSize', 14, 'Interpreter', 'latex')
+plot(by, bzy, '--', 'Color', 'black', 'LineWidth', 2);
+hold on
+plot(-by, bzy, '--', 'Color', 'black', 'LineWidth', 2);
+hold on
+
+
+% % % FUEL STATS %
+% % figure(7)
+% % xlabel('Test Case' ,'Interpreter', 'tex')
+% % ylabel('$\Delta m$' ,'Interpreter', 'latex')
+% % legend({'1: Terrain avoidance guidance', '2: Zhang et al. (2017)', '3: Ebrahimi et al. (2008)'}, 'Location', 'best')
+% % 
+% % figure(8)
+% % xlabel('Algorithm', 'Interpreter', 'latex')
+% % ylabel('$\Delta m$', 'Interpreter', 'latex')
+% % 
+% % 
+% % % THRUST %
+% % 
+% % figure(9)
+% % xlabel('$t$ (s)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % ylabel('$T_x$ (m)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % 
+% % figure(10)
+% % xlabel('$t$ (s)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % ylabel('$T_y$ (m)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % 
+% % figure(11)
+% % xlabel('$t$ (s)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+% % ylabel('$T_z$ (m)', 'FontSize', 14, 'Interpreter', 'latex', 'Color', [0 0 0])
+
 
