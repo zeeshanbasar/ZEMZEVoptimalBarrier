@@ -30,6 +30,7 @@ working PoC of ZEM/ZEV-based, fuel optimal, collision avoidance and planetary la
 
 
 ### UPDATE: 26-10-2022 ###
+- corrected the actual guidance law
 - turns out l2 >> l1 works to a certain extent in giving an accurate thrust bound
 - the issue of croner cases where the traj hits right at the corner of barrier
   - what is to be done of it remains to be seen
