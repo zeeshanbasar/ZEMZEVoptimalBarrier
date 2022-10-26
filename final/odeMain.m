@@ -1,4 +1,4 @@
-function dx = odeMain(t,x,tf,bf,cl)
+function [dx,T] = odeMain(t,x,tf,bf,cl,~)
 dx = zeros(7,1);
     
     %%% PLANET PARAMS %%%
@@ -93,24 +93,24 @@ dx = zeros(7,1);
             if x(3) > h(2)
                 alpha = deg2rad(0.05);
 
-                k3 = ones(3,1);
-                k0 = w(2)*ones(3,1);
-                k1 = tan((pi/2) - alpha)*ones(3,1);
-                k2 = [-h(2);-h(2);h(2) + delta];
+                k3 = ones(2,1);
+                k0 = w(2)*ones(2,1);
+                k1 = tan((pi/2) - alpha)*ones(2,1);
+                k2 = -h(2)*ones(2,1);
 
             elseif ((x(3) <= h(2)) && (x(3) > h(1)))
 
-                k3 = 6*ones(3,1);
-                k0 = w(1)*ones(3,1);
-                k1 = ((w(2) - w(1))/(h(2) - h(1))^(1/k3(1)))*ones(3,1);
-                k2 = [-h(1);-h(1);h(1) + delta];
+                k3 = 6*ones(2,1);
+                k0 = w(1)*ones(2,1);
+                k1 = ((w(2) - w(1))/(h(2) - h(1))^(1/k3(1)))*ones(2,1);
+                k2 = -h(1)*ones(2,1);
 
             else
 
-                k3 = 20*ones(3,1);
-                k0 = zeros(3,1);
-                k1 = (w(1)/h(1)^(1/k3(1)))*ones(3,1);
-                k2 = zeros(3,1);
+                k3 = 20*ones(2,1);
+                k0 = zeros(2,1);
+                k1 = (w(1)/h(1)^(1/k3(1)))*ones(2,1);
+                k2 = zeros(2,1);
 
             end
  %%% fix this %%%
@@ -129,9 +129,9 @@ dx = zeros(7,1);
             end        
         end
 
-        l1 = [1;1;1].*3;
-        l2 = [1;1;1].*6; % l2 > 2*l1 - 1
-        l4 = [50;50;50].*18;
+        l1 = [1;1;1].*1;
+        l2 = [1;1;1].*83;
+        l4 = [50;50;50].*26;
 
         %%% BARRIER DEFN %%%    
         if x(1) >= 0 
@@ -164,12 +164,12 @@ dx = zeros(7,1);
 
 
         %%% NEW OGL %%%
-        p1 = (-s1*l2(1)*l4(1)*b1)/(s1^2 + l1(1))^2;
-        p2 = (-s2*l2(2)*l4(2)*b2)/(s2^2 + l1(2))^2;
-        p3 = (-s3*l2(3)*l4(3)*b3)/(s3^2 + l1(3))^2;
+        p1 = ((s1*l2(1)*l4(1)*b1)/(s1^2 + l1(1))^2);
+        p2 = ((s2*l2(2)*l4(2)*b2)/(s2^2 + l1(2))^2);
+        p3 = ((s3*l2(3)*l4(3)*b3)/(s3^2 + l1(3))^2);
         
         p = [p1; p2; p3];
-        a = ((6*ZEM/tgo^2) - (2*ZEV/tgo) - (p/18)*(tgo^2));        
+        a = ((6*ZEM/tgo^2) - (2*ZEV/tgo) + (p/12)*(tgo^2));        
     end
     
 
@@ -178,10 +178,10 @@ dx = zeros(7,1);
     T = a*x(7);
     
     % uncomment for thrust constraints
-% %     Tmax = 18600;
-% %     for i=1:3
-% %         T(i) = min(max(T(i), -.8*Tmax), .8*Tmax);
-% %     end
+    Tmax = 38000;
+    for i=1:3
+        T(i) = min(max(T(i), -1*Tmax), 1*Tmax);
+    end
 
     
     %%% ATM PERTURB %%%
