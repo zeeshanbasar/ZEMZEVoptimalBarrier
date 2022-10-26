@@ -27,3 +27,11 @@ working PoC of ZEM/ZEV-based, fuel optimal, collision avoidance and planetary la
 - for bf == 5 (2-step, flat top), all barrier calculations are now done by MATLAB
    - all constants are now based on barrier definitions
 - added guidelines for selecting l2, and l1.
+
+
+### UPDATE: 26-10-2022 ###
+- turns out l2 >> l1 works to a certain extent in giving an accurate thrust bound
+- the issue of croner cases where the traj hits right at the corner of barrier
+  - what is to be done of it remains to be seen
+- how to quantitatively choose the a_max?
+  - how does the position of crit point, and velocity affects it?
