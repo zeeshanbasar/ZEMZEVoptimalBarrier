@@ -35,7 +35,7 @@ for i = 1:length(IC) % set this to < parfor > when needed
     
     init = IC(i,:);
 
-    [t,x] = ode45(@(t,x) odefin(t,x,tf,bf,cl), tSpan, init);
+    [t,x] = ode45(@(t,x) odefin_131022(t,x,tf,bf,cl), tSpan, init);
 
     %% PLOTS %%
     N = length(x);
