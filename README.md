@@ -38,3 +38,8 @@ working PoC of ZEM/ZEV-based, fuel optimal, collision avoidance and planetary la
   - what is to be done of it remains to be seen
 - how to quantitatively choose the a_max?
   - how does the position of crit point, and velocity affects it?
+  
+### UPDATE 28-12-2022 ###
+- final code (final.m, odefin.m)
+- cleaned all the nonsense
+- uploaded the IFAC submission
